@@ -54,9 +54,16 @@ const Player = (() => {
     deathTimer = 0;
   }
 
+  // Returns the y clamped so the ship bottom edge stays above the terrain surface
+  function _clampAboveTerrain(wx, wy) {
+    const terrainY = Terrain.getYAtX(wx);
+    return wy + SHIP_H / 2 >= terrainY ? terrainY - SHIP_H / 2 : wy;
+  }
+
   function respawn() {
     x = worldW * Math.random();
     y = (screenH - scannerTopY) / 2 + scannerTopY;
+    y = _clampAboveTerrain(x, y);
     vx = 0;
     vy = 0;
     dir = 1;
@@ -126,6 +133,7 @@ const Player = (() => {
       } else {
         x = Utils.randFloat(0, worldW);
         y = Utils.randFloat(scannerTopY + 30, screenH - 60);
+        y = _clampAboveTerrain(x, y);
       }
     }
 
@@ -143,6 +151,11 @@ const Player = (() => {
 
     // Vertical bounds
     y = Utils.clamp(y, scannerTopY + 10, screenH - 20);
+
+    // Terrain collision: prevent the ship from flying through hills
+    const prevY = y;
+    y = _clampAboveTerrain(x, y);
+    if (y < prevY && vy > 0) vy = 0;
 
     // Thrust particles
     if ((Input.isDown('ArrowRight') || Input.isDown('ArrowLeft') ||

@@ -58,32 +58,40 @@ const Terrain = (() => {
     ctx.fillStyle = TERRAIN_COLOR;
     ctx.strokeStyle = TERRAIN_OUTLINE_COLOR;
     ctx.lineWidth = 2;
-    ctx.beginPath();
 
-    let started = false;
-    for (let i = 0; i < points.length; i++) {
-      // Screen X for this terrain point
-      const sx = Utils.worldToScreen(points[i].x, cameraX, screenW, worldW);
-      const sy = points[i].y;
+    // Collect visible terrain points without using worldToScreen() (which wraps
+    // coordinates and creates visual artifacts when points span the world boundary).
+    // We check both the normal offset (0) and the wrap-around copy (+worldW) so
+    // that the terrain renders correctly when the camera is near the wrap boundary.
+    const margin = SEGMENT_WIDTH;
+    const visiblePoints = [];
 
-      if (!started) {
-        ctx.moveTo(sx, sy);
-        started = true;
-      } else {
-        ctx.lineTo(sx, sy);
+    for (const offset of [0, worldW]) {
+      for (let i = 0; i < points.length; i++) {
+        const sx = points[i].x + offset - cameraX + screenW / 2;
+        if (sx >= -margin && sx <= screenW + margin) {
+          visiblePoints.push({ sx, sy: points[i].y });
+        }
       }
     }
 
-    // Also draw the wrap-around: points shifted by worldW
-    for (let i = 0; i < points.length; i++) {
-      const sx = Utils.worldToScreen(points[i].x + worldW, cameraX, screenW, worldW);
-      const sy = points[i].y;
-      ctx.lineTo(sx, sy);
+    if (visiblePoints.length === 0) {
+      ctx.restore();
+      return;
     }
 
-    // Close polygon at bottom
-    ctx.lineTo(screenW + worldW, screenH);
-    ctx.lineTo(-worldW, screenH);
+    // Sort by screen X so we draw a continuous left-to-right polygon
+    visiblePoints.sort((a, b) => a.sx - b.sx);
+
+    ctx.beginPath();
+    ctx.moveTo(visiblePoints[0].sx, visiblePoints[0].sy);
+    for (let i = 1; i < visiblePoints.length; i++) {
+      ctx.lineTo(visiblePoints[i].sx, visiblePoints[i].sy);
+    }
+
+    // Close polygon down to the bottom of the screen
+    ctx.lineTo(visiblePoints[visiblePoints.length - 1].sx, screenH);
+    ctx.lineTo(visiblePoints[0].sx, screenH);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();

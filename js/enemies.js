@@ -183,7 +183,8 @@ const Enemies = (() => {
       }
 
       // Keep in world bounds vertically
-      e.y = Utils.clamp(e.y, scannerTopY + 10, groundY - 5);
+      const terrainAtX = Terrain.getYAtX(e.x);
+      e.y = Utils.clamp(e.y, scannerTopY + 10, terrainAtX - 15);
       e.x = Utils.wrap(e.x, worldW);
     }
   }
