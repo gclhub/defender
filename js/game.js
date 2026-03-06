@@ -129,7 +129,7 @@ const Game = (() => {
     Player.update(dt);
 
     // Update camera to follow player
-    const targetCamX = Utils.wrap(Player.getX() - screenW / 2, worldW);
+    const targetCamX = Utils.wrap(Player.getX(), worldW);
     // Smooth camera
     let dx = targetCamX - cameraX;
     if (dx > worldW / 2) dx -= worldW;
@@ -323,7 +323,7 @@ const Game = (() => {
     Enemies.init(worldW, screenH, scannerH);
     Projectiles.clearAll();
     Particles.clear();
-    cameraX = 0;
+    cameraX = Player.getX();
   }
 
   function _startWave(w) {
