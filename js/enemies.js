@@ -71,16 +71,16 @@ const Enemies = (() => {
     // Type-specific init
     switch (type) {
       case TYPE.LANDER:
-        e.vx = Utils.randFloat(-60, 60);
-        e.vy = Utils.randFloat(20, 50);
+        e.vx = Utils.randFloat(-100, 100);
+        e.vy = Utils.randFloat(35, 80);
         e.state = 'descending';
         break;
       case TYPE.MUTANT:
-        e.vx = Utils.randFloat(-1, 1) * 120;
-        e.vy = Utils.randFloat(-1, 1) * 120;
+        e.vx = Utils.randFloat(-1, 1) * 195;
+        e.vy = Utils.randFloat(-1, 1) * 195;
         break;
       case TYPE.BOMBER:
-        e.vx = Utils.randChoice([-1, 1]) * Utils.randFloat(80, 140);
+        e.vx = Utils.randChoice([-1, 1]) * Utils.randFloat(130, 225);
         e.vy = 0;
         e.y = Utils.randFloat(scannerTopY + 30, screenH * 0.5);
         e.fireTimer = Utils.randFloat(1, 3);
@@ -91,11 +91,11 @@ const Enemies = (() => {
         e.y = Utils.randFloat(scannerTopY + 40, screenH * 0.4);
         break;
       case TYPE.SWARMER:
-        e.vx = Utils.randFloat(-200, 200);
-        e.vy = Utils.randFloat(-200, 200);
+        e.vx = Utils.randFloat(-320, 320);
+        e.vy = Utils.randFloat(-320, 320);
         break;
       case TYPE.BAITER:
-        e.vx = Utils.randChoice([-1, 1]) * 200;
+        e.vx = Utils.randChoice([-1, 1]) * 320;
         e.vy = 0;
         e.y = Utils.randFloat(scannerTopY + 40, screenH * 0.6);
         break;
@@ -238,7 +238,7 @@ const Enemies = (() => {
         }
         // Drift horizontally
         e.vx += Utils.randFloat(-10, 10) * dt;
-        e.vx = Utils.clamp(e.vx, -80 * speed, 80 * speed);
+        e.vx = Utils.clamp(e.vx, -130 * speed, 130 * speed);
       }
     }
 
@@ -262,10 +262,10 @@ const Enemies = (() => {
         e.carryingHumanoid = e.target;
         e.target = null;
         e.state = 'ascending';
-        e.vy = -80 * speed;
-        e.vx = Utils.randFloat(-40, 40) * speed;
+        e.vy = -130 * speed;
+        e.vx = Utils.randFloat(-65, 65) * speed;
       } else {
-        const spd = 80 * speed;
+        const spd = 130 * speed;
         e.vx = (dx / d) * spd;
         e.vy = (dy / d) * spd;
         e.x += e.vx * dt;
@@ -292,8 +292,8 @@ const Enemies = (() => {
         e.color = COLORS[TYPE.MUTANT];
         e.points = POINTS[TYPE.MUTANT];
         e.state = 'idle';
-        e.vx = Utils.randFloat(-1, 1) * 120;
-        e.vy = Utils.randFloat(-1, 1) * 120;
+        e.vx = Utils.randFloat(-1, 1) * 195;
+        e.vy = Utils.randFloat(-1, 1) * 195;
       }
     }
   }
@@ -306,8 +306,8 @@ const Enemies = (() => {
     const dy = playerY - e.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
 
-    const targetVx = (dx / d) * 160 * speed;
-    const targetVy = (dy / d) * 160 * speed;
+    const targetVx = (dx / d) * 260 * speed;
+    const targetVy = (dy / d) * 260 * speed;
     e.vx = Utils.lerp(e.vx, targetVx, dt * 2);
     e.vy = Utils.lerp(e.vy, targetVy, dt * 2);
 
@@ -330,7 +330,7 @@ const Enemies = (() => {
 
     // Reverse at world edges (won't happen due to wrap, but add slight direction change)
     e.vx += Utils.randFloat(-5, 5) * dt;
-    e.vx = Utils.clamp(e.vx, -180 * speed, 180 * speed);
+    e.vx = Utils.clamp(e.vx, -290 * speed, 290 * speed);
   }
 
   function _updatePod(e, dt, speed) {
@@ -353,10 +353,10 @@ const Enemies = (() => {
 
     // Mix of random and homing
     const homingStr = 0.4;
-    e.vx += ((dx / d) * homingStr + Utils.randFloat(-1, 1) * (1 - homingStr)) * 400 * dt * speed;
-    e.vy += ((dy / d) * homingStr + Utils.randFloat(-1, 1) * (1 - homingStr)) * 400 * dt * speed;
+    e.vx += ((dx / d) * homingStr + Utils.randFloat(-1, 1) * (1 - homingStr)) * 640 * dt * speed;
+    e.vy += ((dy / d) * homingStr + Utils.randFloat(-1, 1) * (1 - homingStr)) * 640 * dt * speed;
 
-    const maxSpd = 220 * speed;
+    const maxSpd = 350 * speed;
     const spd = Math.sqrt(e.vx * e.vx + e.vy * e.vy);
     if (spd > maxSpd) {
       e.vx = (e.vx / spd) * maxSpd;
@@ -375,7 +375,7 @@ const Enemies = (() => {
     const dy = playerY - e.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
 
-    const baiSpd = 220 * speed;
+    const baiSpd = 350 * speed;
     e.vx = Utils.lerp(e.vx, (dx / d) * baiSpd, dt * 3);
     e.vy = Utils.lerp(e.vy, (dy / d) * baiSpd, dt * 3);
 

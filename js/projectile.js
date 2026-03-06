@@ -6,7 +6,7 @@ const Projectiles = (() => {
   // Enemy bombs/mines
   const bombs = [];
 
-  const LASER_SPEED = 900;   // px/s in world space
+  const LASER_SPEED = 1350;  // px/s in world space
   const LASER_WIDTH = 16;
   const LASER_HEIGHT = 3;
   const LASER_MAX_AGE = 1.5; // seconds
@@ -31,7 +31,7 @@ const Projectiles = (() => {
       x: wx,
       y: wy,
       vx: 0,
-      vy: 20,
+      vy: 30,
       age: 0,
       active: true,
     });

@@ -4,9 +4,9 @@ const Player = (() => {
   // Ship dimensions
   const SHIP_W = 24;
   const SHIP_H = 12;
-  const MAX_SPEED_X = 900;
-  const MAX_SPEED_Y = 450;
-  const THRUST = 1400;
+  const MAX_SPEED_X = 1400;
+  const MAX_SPEED_Y = 700;
+  const THRUST = 2200;
   const FRICTION = 0.93;
   const FIRE_RATE = 0.12; // seconds between shots
   const INVUL_TIME = 3.0; // seconds of invulnerability on respawn
