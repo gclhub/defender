@@ -357,7 +357,7 @@ const Game = (() => {
 
     switch (state) {
       case STATE.TITLE:
-        UI.drawTitle(ctx, screenW, screenH, Player.getHighScore ? Player.getHighScore() : 0, stars);
+        UI.drawTitle(ctx, screenW, screenH, _getStoredHighScore(), stars);
         break;
 
       case STATE.PLAYING:
@@ -435,9 +435,6 @@ const Game = (() => {
       return parseInt(localStorage.getItem('defenderHighScore') || '0', 10);
     } catch (_) { return 0; }
   }
-
-  // Override Player.getHighScore for title screen before init
-  const _origPlayerGetHighScore = () => _getStoredHighScore();
 
   return { init, triggerFlash, getWave };
 })();

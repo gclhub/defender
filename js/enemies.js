@@ -477,9 +477,13 @@ const Enemies = (() => {
     ctx.fillStyle = color;
     ctx.lineWidth = 2;
 
-    // Body (rounded rect)
+    // Body (rounded rect with fallback)
     ctx.beginPath();
-    ctx.roundRect(sx - 10, sy - 8, 20, 16, 4);
+    if (ctx.roundRect) {
+      ctx.roundRect(sx - 10, sy - 8, 20, 16, 4);
+    } else {
+      ctx.rect(sx - 10, sy - 8, 20, 16);
+    }
     ctx.stroke();
 
     // Engine pods
