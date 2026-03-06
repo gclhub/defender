@@ -141,6 +141,20 @@ const Player = (() => {
     vx *= Math.pow(FRICTION, dt * 60);
     vy *= Math.pow(FRICTION, dt * 60);
 
+    // Antigravity near screen top and bottom — soft repulsion prevents hard-clamping feel
+    const ANTI_ZONE = 80;
+    const ANTI_FORCE = 1800;
+    const topEdge = scannerTopY + 10;
+    const bottomEdge = screenH - 20;
+    const dTop = y - topEdge;
+    const dBottom = bottomEdge - y;
+    if (dTop < ANTI_ZONE && dTop >= 0) {
+      vy += ANTI_FORCE * (1 - dTop / ANTI_ZONE) * dt;
+    }
+    if (dBottom < ANTI_ZONE && dBottom >= 0) {
+      vy -= ANTI_FORCE * (1 - dBottom / ANTI_ZONE) * dt;
+    }
+
     // Clamp speed
     vx = Utils.clamp(vx, -MAX_SPEED_X, MAX_SPEED_X);
     vy = Utils.clamp(vy, -MAX_SPEED_Y, MAX_SPEED_Y);
