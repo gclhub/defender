@@ -61,12 +61,12 @@ const Terrain = (() => {
 
     // Collect visible terrain points without using worldToScreen() (which wraps
     // coordinates and creates visual artifacts when points span the world boundary).
-    // We check both the normal offset (0) and the wrap-around copy (+worldW) so
-    // that the terrain renders correctly when the camera is near the wrap boundary.
+    // We check three offsets: -worldW (left wrap), 0 (normal), and +worldW (right wrap)
+    // so that the terrain renders correctly when the camera is near either wrap boundary.
     const margin = SEGMENT_WIDTH;
     const visiblePoints = [];
 
-    for (const offset of [0, worldW]) {
+    for (const offset of [-worldW, 0, worldW]) {
       for (let i = 0; i < points.length; i++) {
         const sx = points[i].x + offset - cameraX + screenW / 2;
         if (sx >= -margin && sx <= screenW + margin) {
