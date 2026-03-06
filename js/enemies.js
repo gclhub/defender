@@ -182,9 +182,16 @@ const Enemies = (() => {
           break;
       }
 
-      // Keep in world bounds vertically
+      // Keep in world bounds vertically — bounce off top so enemies don't stack at the ceiling
       const terrainAtX = Terrain.getYAtX(e.x);
-      e.y = Utils.clamp(e.y, scannerTopY + 10, terrainAtX - 15);
+      if (e.y < scannerTopY + 10) {
+        e.y = scannerTopY + 10;
+        if (e.vy < 0) e.vy = Math.abs(e.vy);
+      }
+      if (e.y > terrainAtX - 15) {
+        e.y = terrainAtX - 15;
+        if (e.vy > 0) e.vy = -Math.abs(e.vy);
+      }
       e.x = Utils.wrap(e.x, worldW);
     }
   }
@@ -304,7 +311,16 @@ const Enemies = (() => {
     let dx = playerX - e.x;
     if (dx > worldW / 2) dx -= worldW;
     if (dx < -worldW / 2) dx += worldW;
-    const dy = playerY - e.y;
+    let targetY = playerY;
+
+    // When both mutant and player are near the top of the screen, approach from below
+    // rather than converging at the ceiling — prevents trivial top-of-screen exploit
+    const nearTop = scannerTopY + 100;
+    if (playerY < nearTop && e.y < nearTop + 60) {
+      targetY = playerY + 130;
+    }
+
+    const dy = targetY - e.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
 
     const targetVx = (dx / d) * 260 * speed;
@@ -357,6 +373,11 @@ const Enemies = (() => {
     e.vx += ((dx / d) * homingStr + Utils.randFloat(-1, 1) * (1 - homingStr)) * 640 * dt * speed;
     e.vy += ((dy / d) * homingStr + Utils.randFloat(-1, 1) * (1 - homingStr)) * 640 * dt * speed;
 
+    // Push downward when near the top to prevent accumulation at the ceiling
+    if (e.y < scannerTopY + 60) {
+      e.vy += 400 * dt * speed;
+    }
+
     const maxSpd = 350 * speed;
     const spd = Math.sqrt(e.vx * e.vx + e.vy * e.vy);
     if (spd > maxSpd) {
@@ -373,7 +394,16 @@ const Enemies = (() => {
     let dx = playerX - e.x;
     if (dx > worldW / 2) dx -= worldW;
     if (dx < -worldW / 2) dx += worldW;
-    const dy = playerY - e.y;
+    let targetY = playerY;
+
+    // When both baiter and player are near the top, approach from below
+    // to prevent the top-of-screen exploit
+    const nearTop = scannerTopY + 100;
+    if (playerY < nearTop && e.y < nearTop + 60) {
+      targetY = playerY + 110;
+    }
+
+    const dy = targetY - e.y;
     const d = Math.sqrt(dx * dx + dy * dy) || 1;
 
     const baiSpd = 350 * speed;
