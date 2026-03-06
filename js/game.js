@@ -122,19 +122,19 @@ const Game = (() => {
       return;
     }
 
+    // Update flash
+    UI.updateFlash(dt);
+
+    // Update player
+    Player.update(dt);
+
     // Update camera to follow player
     const targetCamX = Utils.wrap(Player.getX() - screenW / 2, worldW);
     // Smooth camera
     let dx = targetCamX - cameraX;
     if (dx > worldW / 2) dx -= worldW;
     if (dx < -worldW / 2) dx += worldW;
-    cameraX = Utils.wrap(cameraX + dx * Math.min(dt * 5, 1), worldW);
-
-    // Update flash
-    UI.updateFlash(dt);
-
-    // Update player
-    Player.update(dt);
+    cameraX = Utils.wrap(cameraX + dx * Math.min(dt * 20, 1), worldW);
 
     // Check if player needs respawn
     if (!Player.isActive()) {
