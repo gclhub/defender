@@ -151,6 +151,14 @@ const Enemies = (() => {
 
     const speed = 1 + waveDifficulty * 0.15;
 
+    // Constants for boundary antigravity and behind-player scatter
+    const ANTIGRAV_ZONE = 80;   // px from boundary where soft repulsion begins
+    const ANTIGRAV_FORCE = 250; // acceleration magnitude of antigravity
+    const SCATTER_RANGE_X = 800; // horizontal range behind player where scatter applies
+    const SCATTER_RANGE_Y = 100; // vertical band within which behind-player scatter applies
+    const SCATTER_FORCE = 280;   // acceleration magnitude of scatter force
+    const SCATTER_PHASE_FREQ = 5; // oscillation rate for tie-breaking scatter direction when dy === 0
+
     for (const e of list) {
       if (!e.active) continue;
 
@@ -182,14 +190,46 @@ const Enemies = (() => {
           break;
       }
 
-      // Keep in world bounds vertically — bounce off top so enemies don't stack at the ceiling
+      // Soft antigravity near top and bottom screen boundaries — repels enemies before hard clamp
       const terrainAtX = Terrain.getYAtX(e.x);
-      if (e.y < scannerTopY + 10) {
-        e.y = scannerTopY + 10;
+      const topEdgeBound = scannerTopY + 10;
+      const bottomEdgeBound = terrainAtX - 15;
+
+      const distFromTop = e.y - topEdgeBound;
+      if (distFromTop < ANTIGRAV_ZONE && distFromTop >= 0) {
+        e.vy += ANTIGRAV_FORCE * (1 - distFromTop / ANTIGRAV_ZONE) * dt * speed;
+      }
+
+      // Bottom antigravity — skip Landers actively descending or hunting so they can reach the ground
+      if (e.type !== TYPE.LANDER || (e.state !== 'descending' && e.state !== 'hunting')) {
+        const distFromBottom = bottomEdgeBound - e.y;
+        if (distFromBottom < ANTIGRAV_ZONE && distFromBottom >= 0) {
+          e.vy -= ANTIGRAV_FORCE * (1 - distFromBottom / ANTIGRAV_ZONE) * dt * speed;
+        }
+      }
+
+      // Scatter enemies that converge behind the player at the same altitude.
+      // Without this, enemies line up in the player's wake and can be trivially eliminated by reversing.
+      if (Player.isActive() && e.type !== TYPE.LANDER) {
+        const playerDir = Player.getDir();
+        let dxToEnemy = e.x - playerX;
+        if (dxToEnemy > worldW / 2) dxToEnemy -= worldW;
+        if (dxToEnemy < -worldW / 2) dxToEnemy += worldW;
+        const dyToEnemy = e.y - playerY;
+        // Enemy is "behind" when it lies on the side opposite to the player's facing direction
+        if (dxToEnemy * playerDir < 0 && Math.abs(dxToEnemy) < SCATTER_RANGE_X && Math.abs(dyToEnemy) < SCATTER_RANGE_Y) {
+          const pushDir = dyToEnemy !== 0 ? Math.sign(dyToEnemy) : (Math.sin(e.age * SCATTER_PHASE_FREQ) > 0 ? 1 : -1);
+          e.vy += pushDir * SCATTER_FORCE * dt * speed;
+        }
+      }
+
+      // Hard boundary clamp — keep entities inside the play area
+      if (e.y < topEdgeBound) {
+        e.y = topEdgeBound;
         if (e.vy < 0) e.vy = Math.abs(e.vy);
       }
-      if (e.y > terrainAtX - 15) {
-        e.y = terrainAtX - 15;
+      if (e.y > bottomEdgeBound) {
+        e.y = bottomEdgeBound;
         if (e.vy > 0) e.vy = -Math.abs(e.vy);
       }
       e.x = Utils.wrap(e.x, worldW);
